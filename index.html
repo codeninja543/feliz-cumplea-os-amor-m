@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Feliz Cumpleaños Amor 🎂</title>
+<link href="https://fonts.googleapis.com/css?family=Quicksand:400,700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
+
+<style>
+*, *:after, *:before { box-sizing: border-box; }
+body {
+    background: linear-gradient(135deg, #2F4156 0%, #567C8D 45%, #C8D9E6 100%);
+    text-align: center;
+    font-family: 'Quicksand', sans-serif;
+    margin: 0; padding: 0; overflow: hidden;
+    height: 100vh; display: flex;
+    justify-content: center; align-items: center;
+    transition: background 1.0s ease;
+}
+.heart-bg {
+    position: fixed; top: -10px; font-size: 14px;
+    color: rgba(255,30,86,0.55); animation: caer linear forwards;
+    pointer-events: none; z-index: 1;
+}
+@keyframes caer { from{transform:translateY(-10px);opacity:1;} to{transform:translateY(110vh);opacity:0;} }
+
+/* PANDA */
+.panda { position: relative; width: 200px; margin: 0 auto; }
+.face  { width:200px;height:200px;background:#fff;border-radius:100%;margin:50px auto;box-shadow:0 10px 15px rgba(0,0,0,.15);z-index:50;position:relative; }
+.ear,.ear:after { position:absolute;width:80px;height:80px;background:#000;z-index:5;border:10px solid #fff;left:-15px;top:-15px;border-radius:100%; }
+.ear:after { content:'';left:125px; }
+.eye-shade { background:#000;width:50px;height:80px;margin:10px;position:absolute;top:35px;left:25px;transform:rotate(220deg);border-radius:25px/20px 30px 35px 40px; }
+.eye-shade.rgt { transform:rotate(140deg);left:105px; }
+.eye-white { position:absolute;width:30px;height:30px;border-radius:100%;background:#fff;z-index:500;left:40px;top:80px;overflow:hidden; }
+.eye-white.rgt { right:40px;left:auto; }
+.eye-ball { position:absolute;width:0;height:0;left:20px;top:20px;max-width:10px;max-height:10px;transition:.1s; }
+.eye-ball:after { content:'';background:#000;position:absolute;border-radius:100%;right:0;bottom:0;width:20px;height:20px; }
+.nose { position:absolute;height:20px;width:35px;bottom:40px;left:0;right:0;margin:auto;border-radius:50px 20px/30px 15px;transform:rotate(15deg);background:#000; }
+.mouth { background:#000;position:absolute;width:25px;height:10px;bottom:20px;left:0;right:0;margin:auto;border-radius:0 0 20px 20px; }
+.body { background:#fff;position:absolute;top:200px;left:-20px;border-radius:100px 100px 100px 100px/126px 126px 96px 96px;width:250px;height:282px;box-shadow:0 5px 10px rgba(0,0,0,.3); }
+.foot { top:360px;left:-80px;position:absolute;background:#000;z-index:1400;box-shadow:0 5px 5px rgba(0,0,0,.2);border-radius:40px 40px 39px 40px/26px 26px 63px 63px;width:82px;height:120px; }
+.foot:after { content:'';width:55px;height:65px;background:#222;border-radius:100%;position:absolute;bottom:10px;left:0;right:0;margin:auto; }
+.foot .finger,.foot .finger:after,.foot .finger:before { position:absolute;width:25px;height:35px;background:#222;border-radius:100%;top:10px;right:5px; }
+.foot .finger:after,.foot .finger:before { content:'';right:30px;width:20px;top:0; }
+.foot .finger:before { right:55px;top:5px; }
+.foot.rgt { left:auto;right:-80px; }
+.foot.rgt .finger,.foot.rgt .finger:after,.foot.rgt .finger:before { left:5px;right:auto; }
+.foot.rgt .finger:after { left:30px;right:auto; }
+.foot.rgt .finger:before { left:55px;right:auto; }
+
+/* INTRO */
+.intro-card { max-width:320px;width:90%;padding:28px 28px 24px;background:#fff;box-shadow:0 10px 15px rgba(0,0,0,.15);border-radius:20px;transform:translateY(-80px);z-index:500;position:relative; }
+.intro-card .hand,.intro-card .hand:after,.intro-card .hand:before { width:40px;height:30px;border-radius:50px;box-shadow:0 2px 3px rgba(0,0,0,.15);background:#000;margin:5px;position:absolute;top:50px;left:-25px;transition:.3s; }
+.intro-card .hand:after,.intro-card .hand:before { content:'';left:-5px;top:11px; }
+.intro-card .hand:before { top:26px; }
+.intro-card .hand.rgt { left:auto;right:-25px; }
+.intro-card .hand.rgt:after,.intro-card .hand.rgt:before { left:auto;right:-5px; }
+.intro-card h1 { color:#FF4081;font-size:20px;margin:0 0 8px; }
+.intro-card .frase { color:#555;font-size:14px;line-height:1.6;margin-bottom:18px; }
+.btn-entrar { background:linear-gradient(135deg,#ff4d6d,#ff1e56);color:#fff;border:none;width:100%;padding:13px;border-radius:30px;font-family:'Quicksand',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:.2s; }
+.btn-entrar:active { transform:scale(.96); }
+
+/* PANTALLAS */
+#pantallas { display:none;position:fixed;inset:0;background:linear-gradient(135deg,#2F4156,#567C8D,#C8D9E6);z-index:100;justify-content:center;align-items:center; }
+.pantalla { display:none;background:rgba(255,255,255,.95);width:92%;max-width:340px;padding:20px;border-radius:25px;text-align:center;box-shadow:0 15px 35px rgba(0,0,0,.25);animation:aparecer .8s ease;max-height:92vh;overflow-y:auto; }
+.pantalla.activa { display:block; }
+@keyframes aparecer { from{opacity:0;transform:scale(.9);}to{opacity:1;transform:scale(1);} }
+.pantalla h1 { color:#ff2e63;font-size:20px;margin-bottom:6px; }
+.pantalla p  { color:#333;font-size:15px;line-height:1.5; }
+img.card-img { width:70%;max-width:200px;border-radius:20px;margin:12px auto;display:block;cursor:pointer;transition:transform .15s; }
+img.card-img:active { transform:scale(.96); }
+.btn-sig { margin-top:12px;padding:11px;width:100%;border:none;border-radius:30px;background:linear-gradient(135deg,#ff4d6d,#ff1e56);color:#fff;font-size:15px;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer; }
+.btn-sig:active { transform:scale(.95); }
+.video-wrap { border-radius:14px;overflow:hidden;margin:12px 0;box-shadow:0 4px 15px rgba(255,30,86,.2); }
+.two-photos { display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0; }
+.photo-card { background:#fff5f7;border-radius:14px;padding:8px 6px;border:1px solid #ffc2cc; }
+.photo-card img { width:90%;border-radius:10px;margin:0 auto 5px;display:block;cursor:pointer; }
+.photo-card p { font-size:12px;color:#ff2e63;margin:0;line-height:1.3; }
+
+/* LIGHTBOX */
+#lightbox { display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9999;align-items:center;justify-content:center; }
+#lightbox.abierto { display:flex; }
+#lightbox img { max-width:92vw;max-height:88vh;border-radius:18px;cursor:pointer; }
+#lb-cerrar { position:fixed;top:14px;right:18px;font-size:32px;color:#fff;cursor:pointer;z-index:10000; }
+
+/* TEXTOS FLOTANTES */
+.teamo { position:fixed;color:#ff1e56;font-size:18px;font-family:'Quicksand',sans-serif;font-weight:700;animation:subir 2.5s linear forwards;pointer-events:none;z-index:300; }
+@keyframes subir { from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-120px) scale(1.4);} }
+
+/* GALAXIA OVERLAY */
+#galaxiaOverlay { display:none;position:fixed;inset:0;z-index:500;background:#000; }
+#galaxiaOverlay.visible { display:block; }
+#galaxiaFrame { width:100%;height:100%;position:absolute;top:0;left:0;border:0;background:#000; }
+#galaxiaContainer { width:100%;height:100%;position:absolute;top:0;left:0; }
+#galaxiaContainer canvas { display:block; }
+#btnVolverGalaxia { position:fixed;top:16px;left:50%;transform:translateX(-50%);background:rgba(180,20,60,.45);backdrop-filter:blur(8px);border:1px solid rgba(255,100,150,.5);color:#fff;border-radius:50px;padding:9px 24px;font-size:14px;font-family:'Quicksand',sans-serif;font-weight:700;cursor:pointer;z-index:600; }
+</style>
+</head>
+<body>
+
+<audio id="musica" loop preload="auto">
+    <source src="https://github.com/codeninja543/codeninja5433/raw/refs/heads/main/Kil%C3%B3metros%20(Cover).mp3" type="audio/mpeg">
+</audio>
+
+<div id="inicio">
+    <div class="panda">
+        <div class="ear"></div>
+        <div class="face">
+            <div class="eye-shade"></div>
+            <div class="eye-white"><div class="eye-ball"></div></div>
+            <div class="eye-shade rgt"></div>
+            <div class="eye-white rgt"><div class="eye-ball"></div></div>
+            <div class="nose"></div>
+            <div class="mouth"></div>
+        </div>
+        <div class="body"></div>
+        <div class="foot"><div class="finger"></div></div>
+        <div class="foot rgt"><div class="finger"></div></div>
+    </div>
+    <div class="intro-card">
+        <div class="hand"></div>
+        <div class="hand rgt"></div>
+        <h1>Feliz Cumpleaños Amor 🎂</h1>
+        <p class="frase">
+            Hoy es tu día especial y quiero que sepas<br>
+            que eres lo más bonito de mi vida.<br>
+            Esto es solo para ti, mi amor 🎉💕
+        </p>
+        <button class="btn-entrar" onclick="playMusic();entrar()">Toca aquí amor ❤️</button>
+    </div>
+</div>
+
+<div id="pantallas">
+    <div class="pantalla activa" id="p1">
+        <h1>Feliz Cumpleaños Amor 🎂</h1>
+        <img class="card-img" src="https://i.postimg.cc/MG7LvSMg/111.jpg" onclick="abrirImg(this)">
+        <p>Hoy cumples un año más de ser<br>la persona más especial de mi vida.<br>¡Que este día sea tan increíble como tú! 🎉</p>
+        <button class="btn-sig" onclick="sig(1)">Siguiente 💖</button>
+    </div>
+    <div class="pantalla" id="p2">
+        <h1>Eres mi regalo de vida 🎁</h1>
+        <img class="card-img" src="https://i.postimg.cc/HLwNVgcN/2222.jpg" onclick="abrirImg(this)">
+        <p>Cada año a tu lado es un regalo hermoso.<br>Gracias por existir y por llenar<br>mis días de tanta felicidad 🌺</p>
+        <button class="btn-sig" onclick="sig(2)">Siguiente ❤️</button>
+    </div>
+    <div class="pantalla" id="p3">
+        <h1>Hoy es tu día, mi amor 🥳</h1>
+        <img class="card-img" src="https://i.postimg.cc/GpFfHC8S/3333.jpg" onclick="abrirImg(this)">
+        <p>Tu sonrisa hoy brilla más que nunca,<br>porque hoy el mundo celebra<br>que tú naciste 💫🎂</p>
+        <button class="btn-sig" onclick="sig(3)">Siguiente 💖</button>
+    </div>
+    <div class="pantalla" id="p4">
+        <h1>Mi deseo para ti 🕯️</h1>
+        <img class="card-img" src="https://i.postimg.cc/6QrPyX2j/444.jpg" onclick="abrirImg(this)">
+        <p>Pido que todos tus sueños se hagan realidad,<br>que la vida te llene de bendiciones<br>y que siempre estés a mi lado 💫</p>
+        <button class="btn-sig" onclick="sig(4)">Un último regalo 🎁</button>
+    </div>
+    <div class="pantalla" id="p5">
+        <h1>Todo esto es para ti… 💖</h1>
+        <p style="margin-bottom:8px">Eres mi fotografía favorita,<br>mi amor eterno, feliz cumpleaños mi todo 🎂🌹</p>
+        <div class="video-wrap">
+            <video controls playsinline style="width:100%;display:block;border-radius:14px;">
+                <source src="https://github.com/codeninja543/video-code_ninja/raw/refs/heads/main/Frases%20para%20enamorar%20%20%20Video%20para%20estado%20de%20Whatsapp%20de%20amor.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="two-photos">
+            <div class="photo-card">
+                <img src="https://i.postimg.cc/xdvZc2Jp/555.jpg" onclick="abrirImg(this)">
+                <p>Feliz cumple, mi amor,<br>eres mi todo 🎉🌸</p>
+            </div>
+            <div class="photo-card">
+                <img src="https://i.postimg.cc/BvTzX0Lm/66666.avif" onclick="abrirImg(this)">
+                <p>Hoy celebro que existes,<br>mi reina, mi vida 🎂💕</p>
+            </div>
+        </div>
+        <button class="btn-sig" onclick="abrirGalaxia()">🌌 Eres Mi Galaxia 🌌</button>
+    </div>
+</div>
+
+<div id="lightbox">
+    <span id="lb-cerrar" onclick="cerrarImg()">✕</span>
+    <img id="lb-img" src="" onclick="cerrarImg()">
+</div>
+
+<div id="galaxiaOverlay">
+    <iframe id="galaxiaFrame" title="Galaxy Love" srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot; /&gt;
+&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;/&gt;
+&lt;title&gt;Galaxy de Amor&lt;/title&gt;
+&lt;link rel=&quot;icon&quot; href=&quot;data:,&quot;&gt;
+&lt;style&gt;
+  * { margin: 0; padding: 0; }
+  html, body { overflow: hidden; height: 100%; background: black; }
+  .webgl { position: fixed; top: 0; left: 0; outline: none; }
+    #titulo-corazon {
+        position: fixed;
+        top: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #ffd7ef;
+        font-family: Arial, sans-serif;
+        font-size: clamp(1.2rem, 2.8vw, 2rem);
+        font-weight: bold;
+        text-shadow: 0 0 10px #ff3ea5, 0 0 24px #ff3ea5;
+        z-index: 20;
+        pointer-events: none;
+    }
+    #modal-carta {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(3px);
+        z-index: 30;
+    }
+    #modal-carta.visible {
+        display: flex;
+    }
+    .carta {
+        width: min(86vw, 420px);
+        background: linear-gradient(160deg, #fff8fb 0%, #ffe9f4 100%);
+        border: 2px solid #ffc7e4;
+        border-radius: 18px;
+        padding: 22px 20px 16px;
+        box-shadow: 0 12px 36px rgba(255, 20, 147, 0.4);
+        color: #8a235f;
+        font-family: &#x27;Georgia&#x27;, serif;
+        text-align: center;
+        position: relative;
+        animation: cartaAparece 0.28s ease-out;
+    }
+    .carta h3 {
+        font-size: 1.15rem;
+        margin-bottom: 10px;
+    }
+    #mensaje-romantico {
+        font-size: clamp(1.05rem, 2.5vw, 1.35rem);
+        line-height: 1.5;
+        color: #b01867;
+        text-shadow: 0 0 10px rgba(255, 70, 150, 0.2);
+    }
+    #cerrar-carta {
+        margin-top: 14px;
+        border: none;
+        border-radius: 999px;
+        background: #ff4da6;
+        color: #fff;
+        font-size: 0.95rem;
+        font-weight: bold;
+        padding: 8px 16px;
+        cursor: pointer;
+    }
+    @keyframes cartaAparece {
+        from { opacity: 0; transform: scale(0.9) translateY(12px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;canvas class=&quot;webgl&quot;&gt;&lt;/canvas&gt;
+&lt;div id=&quot;titulo-corazon&quot;&gt;Apreta el corazon&lt;/div&gt;
+&lt;div id=&quot;modal-carta&quot;&gt;
+    &lt;div class=&quot;carta&quot;&gt;
+        &lt;h3&gt;Para ti en tu dia especial 🎂&lt;/h3&gt;
+        &lt;p id=&quot;mensaje-romantico&quot;&gt;&lt;/p&gt;
+        &lt;button id=&quot;cerrar-carta&quot;&gt;Cerrar&lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+const scene = new THREE.Scene();
+const ORBIT_SYNC_SPEED = 0.003;
+
+function crearEstrellasFondo() {
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 5000;
+    const positions = new Float32Array(starCount * 3);
+    for (let i = 0; i &lt; starCount * 3; i++) {
+        positions[i] = (Math.random() - 0.5) * 500;
+    }
+    starGeometry.setAttribute(&#x27;position&#x27;, new THREE.BufferAttribute(positions, 3));
+    const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 0.7, transparent: true });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+}
+crearEstrellasFondo();
+
+let galaxy;
+const parameters = {
+    count: 80000, size: 0.01, radius: 6, branches: 4, spin: 1,
+    randomness: 0.2, randomnessPower: 3,
+    insideColor: &quot;#ff1b6b&quot;, outsideColor: &quot;#3000ff&quot;
+};
+
+function generateGalaxy() {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(parameters.count * 3);
+    const colors = new Float32Array(parameters.count * 3);
+    const colorInside = new THREE.Color(parameters.insideColor);
+    const colorOutside = new THREE.Color(parameters.outsideColor);
+    for (let i = 0; i &lt; parameters.count; i++) {
+        const i3 = i * 3;
+        const radius = Math.random() * parameters.radius;
+        const spinAngle = radius * parameters.spin;
+        const branchAngle = ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
+        const randomX = (Math.random() - 0.5) * parameters.randomness * radius;
+        const randomY = (Math.random() - 0.5) * parameters.randomness * radius;
+        const randomZ = (Math.random() - 0.5) * parameters.randomness * radius;
+        positions[i3]     = Math.cos(branchAngle + spinAngle) * radius + randomX;
+        positions[i3 + 1] = randomY;
+        positions[i3 + 2] = Math.sin(branchAngle + spinAngle) * radius + randomZ;
+        const mixed = colorInside.clone().lerp(colorOutside, radius / parameters.radius);
+        colors[i3] = mixed.r; colors[i3+1] = mixed.g; colors[i3+2] = mixed.b;
+    }
+    geometry.setAttribute(&quot;position&quot;, new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute(&quot;color&quot;, new THREE.BufferAttribute(colors, 3));
+    const material = new THREE.PointsMaterial({ size: parameters.size, vertexColors: true, blending: THREE.AdditiveBlending, depthWrite: false });
+    galaxy = new THREE.Points(geometry, material);
+    scene.add(galaxy);
+}
+generateGalaxy();
+
+const heartGeometry = new THREE.BufferGeometry();
+const hPos = [], hCol = [];
+for (let i = 0; i &lt; 3500; i++) {
+    const t = Math.random() * Math.PI * 2;
+    const s = Math.random() * 0.6 + 0.4;
+    let x = 17 * Math.pow(Math.sin(t), 3);
+    let y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+    let z = (Math.random() - 0.5) * 1;
+    x *= s * 0.15; y *= s * 0.15; z *= s * 0.15;
+    hPos.push(x, y + 2.2, z);
+    let c = new THREE.Color(); c.setHSL(0.95 + Math.random() * 0.05, 1, 0.65);
+    hCol.push(c.r, c.g, c.b);
+}
+heartGeometry.setAttribute(&quot;position&quot;, new THREE.Float32BufferAttribute(hPos, 3));
+heartGeometry.setAttribute(&quot;color&quot;, new THREE.Float32BufferAttribute(hCol, 3));
+const heartMaterial = new THREE.PointsMaterial({ size: 0.12, vertexColors: true });
+const heart = new THREE.Points(heartGeometry, heartMaterial);
+scene.add(heart);
+
+// Corazon 3D procedural — siempre funciona sin cargar archivos externos
+function crearCorazon3D() {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0.5);
+    shape.bezierCurveTo(0, 0.9, 0.5, 1.1, 0.75, 0.75);
+    shape.bezierCurveTo(1.1, 0.4, 1.0, -0.2, 0, -0.7);
+    shape.bezierCurveTo(-1.0, -0.2, -1.1, 0.4, -0.75, 0.75);
+    shape.bezierCurveTo(-0.5, 1.1, 0, 0.9, 0, 0.5);
+    const extrudeSettings = { depth: 0.4, bevelEnabled: true, bevelSegments: 6, steps: 2, bevelSize: 0.12, bevelThickness: 0.12 };
+    const geo = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+    geo.center();
+    const mat = new THREE.MeshPhongMaterial({
+        color: 0xff1155, emissive: 0x880022, shininess: 120,
+        specular: 0xff88aa
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(0, 3.2, 0);
+    mesh.scale.set(1.5, 1.5, 1.5);
+    // Luz para que brille el corazon
+    const pointLight = new THREE.PointLight(0xff3366, 2, 12);
+    pointLight.position.set(0, 3.2, 2);
+    scene.add(pointLight);
+    scene.add(mesh);
+    return mesh;
+}
+const heartModel = crearCorazon3D();
+
+const frases = [
+    &quot;Feliz Cumple 🎂&quot;, &quot;Te amo 💘&quot;, &quot;Mi amor eterno &quot;, &quot;Hoy es tu dia &quot;, &quot;Te adoro 💞&quot;,
+    &quot;Mi reina 👑&quot;, &quot;Eres mi todo 💫&quot;, &quot;Felicidades amor &quot;, &quot;Mi universo &quot;,
+    &quot;Guapa 😍&quot;, &quot;Preciosa 💕&quot;, &quot;Princesa &quot;, &quot;Cumple feliz 🎉&quot;, &quot;Mi vida 🌹&quot;
+];
+
+function crearTexto(msg, size=1.8) {
+    const canvas = document.createElement(&quot;canvas&quot;);
+    canvas.width = 512; canvas.height = 128;
+    const ctx = canvas.getContext(&quot;2d&quot;);
+    ctx.font = &quot;bold 50px Arial&quot;;
+    ctx.textAlign = &quot;center&quot;; ctx.textBaseline = &quot;middle&quot;;
+    ctx.fillStyle = &quot;#ff1493&quot;;
+    ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(size * 4, size, 1);
+    return sprite;
+}
+
+let textoSprites = [];
+for (let i = 0; i &lt; 90; i++) {
+    let t = crearTexto(frases[Math.floor(Math.random() * frases.length)], 1 + Math.random());
+    let x = (Math.random() - 0.5) * 40;
+    let y = (Math.random() - 0.5) * 25;
+    let z = (Math.random() - 0.5) * 40;
+    if (Math.abs(x) &lt; 5 &amp;&amp; Math.abs(y) &lt; 5) y += 7;
+    t.position.set(x, y, z);
+    t.userData = {
+        baseY: y, orbitRadius: Math.sqrt(x*x+z*z),
+        orbitAngle: Math.atan2(z, x), orbitSpeed: ORBIT_SYNC_SPEED,
+        floatAmp: Math.random()*0.6+0.2, floatSpeed: Math.random()*0.8+0.6,
+        phase: Math.random()*Math.PI*2, baseSize: 1+Math.random()
+    };
+    t.scale.set(t.userData.baseSize*4, t.userData.baseSize, 1);
+    scene.add(t); textoSprites.push(t);
+}
+
+const photoTextureLoader = new THREE.TextureLoader();
+const urls = [
+    &quot;https://i.postimg.cc/hGG3WZ0S/IMG-20260509-WA0005.jpg&quot;,
+    &quot;https://i.postimg.cc/FKKn5Cxv/IMG-20260509-WA0006.jpg&quot;,
+    &quot;https://i.postimg.cc/6pc1PxC5/IMG-20260509-WA0007.jpg&quot;
+];
+let fotoSprites = [];
+for (let i = 0; i &lt; 30; i++) {
+    const texture = photoTextureLoader.load(urls[i % urls.length]);
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+    const scale = 1 + Math.random();
+    sprite.scale.set(scale, scale, 1);
+    let x=(Math.random()-0.5)*40, y=(Math.random()-0.5)*25, z=(Math.random()-0.5)*40;
+    if (Math.abs(x)&lt;5 &amp;&amp; Math.abs(y)&lt;5) y+=7;
+    sprite.position.set(x,y,z);
+    sprite.userData = {
+        baseY:y, orbitRadius:Math.sqrt(x*x+z*z), orbitAngle:Math.atan2(z,x),
+        orbitSpeed:ORBIT_SYNC_SPEED, floatAmp:Math.random()*0.5+0.15,
+        floatSpeed:Math.random()*0.9+0.5, phase:Math.random()*Math.PI*2, baseScale:scale
+    };
+    scene.add(sprite); fotoSprites.push(sprite);
+}
+
+const sizes = { width: window.innerWidth, height: window.innerHeight };
+const camera = new THREE.PerspectiveCamera(75, sizes.width/sizes.height, 0.1, 600);
+camera.position.set(10, 12, 20);
+scene.add(camera);
+
+const canvasEl = document.querySelector(&#x27;.webgl&#x27;);
+const renderer = new THREE.WebGLRenderer({ canvas: canvasEl, antialias: true });
+renderer.setSize(sizes.width, sizes.height);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+const clock = new THREE.Clock();
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const modalCarta = document.getElementById(&#x27;modal-carta&#x27;);
+const mensajeRomantico = document.getElementById(&#x27;mensaje-romantico&#x27;);
+const cerrarCarta = document.getElementById(&#x27;cerrar-carta&#x27;);
+
+const frasesRomanticas = [
+    &#x27;Desde que llegaste a mi vida, siento que el universo encontró su forma más bonita. Hoy, en tu cumpleaños, quiero que sepas que eres el mejor regalo que la vida me pudo dar. Cada día a tu lado es una celebración, pero hoy más que nunca celebro que naciste tú, mi amor, mi todo, mi persona favorita en este universo infinito. Feliz cumpleaños, mi reina. ✨🎂&#x27;
+];
+
+function mostrarMensajeRomantico() {
+    const mensaje = frasesRomanticas[Math.floor(Math.random() * frasesRomanticas.length)];
+    mensajeRomantico.textContent = mensaje;
+    modalCarta.classList.add(&#x27;visible&#x27;);
+}
+
+cerrarCarta.addEventListener(&#x27;click&#x27;, () =&gt; { modalCarta.classList.remove(&#x27;visible&#x27;); });
+modalCarta.addEventListener(&#x27;click&#x27;, (event) =&gt; { if (event.target === modalCarta) modalCarta.classList.remove(&#x27;visible&#x27;); });
+
+canvasEl.addEventListener(&#x27;pointerdown&#x27;, (event) =&gt; {
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const impactos = raycaster.intersectObject(heartModel, true);
+    if (impactos.length &gt; 0) mostrarMensajeRomantico();
+});
+
+function tick() {
+    const elapsed = clock.getElapsedTime();
+    galaxy.rotation.y += 0.001;
+    heart.rotation.y += ORBIT_SYNC_SPEED;
+    heart.rotation.z = Math.sin(elapsed * 1.7) * 0.08;
+    heartModel.rotation.y += 0.01;
+        heartModel.rotation.x = Math.sin(elapsed * 1.8) * 0.1;
+        heartModel.position.y = 3.2 + Math.sin(elapsed * 2.2) * 0.25;
+    textoSprites.forEach(t =&gt; {
+        const d = t.userData;
+        d.orbitAngle += d.orbitSpeed;
+        t.position.x = Math.cos(d.orbitAngle) * d.orbitRadius;
+        t.position.z = Math.sin(d.orbitAngle) * d.orbitRadius;
+        t.position.y = d.baseY + Math.sin(elapsed * d.floatSpeed + d.phase) * d.floatAmp;
+        const pulse = 1 + Math.sin(elapsed * 2.4 + d.phase) * 0.1;
+        t.scale.set(d.baseSize*4*pulse, d.baseSize*pulse, 1);
+        t.material.opacity = 0.72 + Math.sin(elapsed * 1.9 + d.phase) * 0.2;
+        t.lookAt(camera.position);
+    });
+    fotoSprites.forEach(s =&gt; {
+        const d = s.userData;
+        d.orbitAngle += d.orbitSpeed;
+        s.position.x = Math.cos(d.orbitAngle) * d.orbitRadius;
+        s.position.z = Math.sin(d.orbitAngle) * d.orbitRadius;
+        s.position.y = d.baseY + Math.sin(elapsed * d.floatSpeed + d.phase) * d.floatAmp;
+        const pulse = 1 + Math.sin(elapsed * 1.7 + d.phase) * 0.08;
+        s.scale.set(d.baseScale*pulse, d.baseScale*pulse, 1);
+        s.material.rotation += 0.0015;
+        s.material.opacity = 0.7 + Math.sin(elapsed * 1.5 + d.phase) * 0.25;
+        s.lookAt(camera.position);
+    });
+    controls.update();
+    renderer.render(scene, camera);
+    requestAnimationFrame(tick);
+}
+tick();
+
+window.addEventListener(&#x27;resize&#x27;, () =&gt; {
+    sizes.width = window.innerWidth; sizes.height = window.innerHeight;
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(sizes.width, sizes.height);
+});
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>
+    <button id="btnVolverGalaxia" onclick="cerrarGalaxia()">↩ Volver</button>
+</div>
+
+<script>
+/* OJOS */
+$(document).on("mousemove touchmove",function(e){
+    var x=e.type==='touchmove'?e.originalEvent.touches[0].pageX:e.pageX;
+    var y=e.type==='touchmove'?e.originalEvent.touches[0].pageY:e.pageY;
+    var dw=$(document).width()/15,dh=$(document).height()/15;
+    $('.eye-ball').css({width:x/dw,height:y/dh});
+});
+
+/* CORAZONES */
+function crearHeartBg(){
+    var h=document.createElement("div");h.className="heart-bg";h.innerHTML="feliz cumple";
+    h.style.left=Math.random()*100+"vw";h.style.animationDuration=(3+Math.random()*3)+"s";
+    document.body.appendChild(h);setTimeout(function(){h.remove();},6000);
+}
+setInterval(crearHeartBg,300);
+
+/* TEXTOS FLOTANTES */
+var frases=["Feliz Cumple 🎂","Mi amor 💕","Hoy es tu día 🎉","Te quiero 💖","Mi vida 🌹","Mi reina ✨","Felicidades amor 🎁","Eres mi todo 💫","Cumpleaños feliz 🥳"];
+function crearTeAmo(x,y){
+    var t=document.createElement("div");t.className="teamo";
+    t.innerText=frases[Math.floor(Math.random()*frases.length)];
+    t.style.left=x+"px";t.style.top=y+"px";
+    document.body.appendChild(t);setTimeout(function(){t.remove();},2500);
+}
+
+/* MÚSICA */
+var musica=document.getElementById("musica");
+var musicaOn=false;
+function playMusic(){
+    if(musicaOn)return;
+    musica.load();
+    var promise = musica.play();
+    if(promise !== undefined){
+        promise.then(function(){ musicaOn=true; }).catch(function(e){
+            // Reintento con interaccion del usuario
+            musica.play().then(function(){ musicaOn=true; }).catch(function(){});
+        });
+    }
+}
+
+/* Al primer toque o clic en cualquier parte */
+function primerToque(){
+    playMusic();
+    document.removeEventListener("click", primerToque);
+    document.removeEventListener("touchstart", primerToque);
+}
+document.addEventListener("click", primerToque);
+document.addEventListener("touchstart", primerToque, {passive:true});
+
+/* NAVEGACIÓN */
+function entrar(){
+    playMusic();
+    $("#inicio").fadeOut(500);
+    setTimeout(function(){$("#pantallas").css("display","flex");},500);
+}
+function sig(n){
+    document.getElementById("p"+n).classList.remove("activa");
+    document.getElementById("p"+(n+1)).classList.add("activa");
+}
+
+/* LIGHTBOX */
+function abrirImg(img){
+    document.getElementById("lb-img").src=img.src;
+    document.getElementById("lightbox").classList.add("abierto");
+}
+function cerrarImg(){document.getElementById("lightbox").classList.remove("abierto");}
+document.getElementById("lightbox").addEventListener("click",function(e){if(e.target===this)cerrarImg();});
+
+/* TOQUES */
+var lastTouchTime=0;
+function handleInteraction(x,y,target){
+    playMusic();
+    if(target&&(target.closest("#lightbox")||target.tagName==="BUTTON"||target.classList.contains("card-img")))return;
+    crearTeAmo(x,y-50);
+}
+document.addEventListener("touchstart",function(e){
+    lastTouchTime=Date.now();
+    var t=e.touches[0];
+    handleInteraction(t.clientX,t.clientY,e.target);
+},{passive:true});
+document.addEventListener("click",function(e){
+    if(Date.now()-lastTouchTime<500)return;
+    handleInteraction(e.clientX,e.clientY,e.target);
+});
+
+/* GALAXIA */
+function abrirGalaxia(){
+    playMusic();
+    document.getElementById("galaxiaOverlay").classList.add("visible");
+    document.getElementById("galaxiaFrame").style.display="block";
+}
+function cerrarGalaxia(){
+    document.getElementById("galaxiaOverlay").classList.remove("visible");
+}
+</script>
+</body>
+</html>
